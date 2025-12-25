@@ -1,0 +1,117 @@
+drop database insure;
+create database insure;
+
+create table insure.person
+(
+driver_id varchar(10),name varchar(20),
+address varchar(30),primary key(driver_id)
+);
+
+create table insure.car(reg_num varchar(10),model varchar(10),
+year int,primary key(reg_num));
+
+create table insure.accident
+(
+report_num int,accident_date date,
+location varchar(20),primary key(report_num)
+);
+
+create table insure.owns
+(
+driver_id varchar(10),reg_num varchar(10),
+primary key(driver_id,reg_num),
+foreign key(driver_id)references insure.person(driver_id),
+foreign key(reg_num)references insure.car(reg_num)
+);
+
+create table insure.participated
+(
+driver_id varchar(10), reg_num varchar(10),
+report_num int, damage_amount int,
+primary key(driver_id, reg_num, report_num),
+foreign key(driver_id) references insure.person(driver_id),
+foreign key(reg_num) references insure.car(reg_num),
+foreign key(report_num) references insure.accident(report_num)
+);
+
+desc insure.car;
+desc insure.person;
+
+INSERT INTO insure.person VALUES ('A01', 'RICHARD', 'srinivas nagar');
+INSERT INTO insure.person VALUES ('A02', 'PRADEEP', 'rajaji nagar');
+INSERT INTO insure.person VALUES ('A03', 'SMITH', 'ashok nagar');
+INSERT INTO insure.person VALUES ('A04', 'VENU', 'nr colony');
+INSERT INTO insure.person VALUES ('A05', 'JHON', 'hanumaanth  nagar');
+
+INSERT INTO insure.car VALUES ('KA052250', 'INDICA', '1990');
+INSERT INTO insure.car VALUES ('KA031181', 'LANCER', '1957');
+INSERT INTO insure.car VALUES ('KA095477', 'TOYOTA', '1998');
+INSERT INTO insure.car VALUES ('KA053408', 'HONDA', '2008');
+INSERT INTO insure.car VALUES ('KA041702', 'AUDI', '2005');
+
+INSERT INTO insure.owns VALUES ('A01', 'KA052250');
+INSERT INTO insure.owns VALUES ('A02', 'KA031181');
+INSERT INTO insure.owns VALUES ('A03', 'KA095477');
+INSERT INTO insure.owns VALUES ('A04', 'KA053408');
+INSERT INTO insure.owns VALUES ('A05', 'KA041702');
+
+INSERT INTO insure.accident VALUES (11, '2003-01-01', 'Mysore Road');
+INSERT INTO insure.accident VALUES (12, '2004-02-02', 'South end Circle');
+INSERT INTO insure.accident VALUES (13, '2003-01-21', 'Bull temple Road');
+INSERT INTO insure.accident VALUES (14, '2008-02-17', 'Mysore Road');
+INSERT INTO insure.accident VALUES (15, '2004-03-05', 'Kanakpura Road');
+
+INSERT INTO insure.participated VALUES ('A01', 'KA052250','11','10000');
+INSERT INTO insure.participated VALUES ('A02', 'KA053408','12','50000');
+INSERT INTO insure.participated VALUES ('A03', 'KA095477','13','25000');
+INSERT INTO insure.participated VALUES ('A04', 'KA031181','14','3000');
+INSERT INTO insure.participated VALUES ('A05', 'KA041702','15','5000');
+
+SELECT * FROM  insure.person;
+SELECT * FROM  insure.car;
+SELECT * FROM  insure.owns;
+SELECT * FROM  insure.accident;
+SELECT * FROM  insure.participated;
+
+
+UPDATE insure.participated SET damage_amount=25000 WHERE reg_num = 'KA053408' AND report_num = 12;
+SELECT * FROM  insure.participated;
+
+
+INSERT INTO insure.accident VALUES (16, '2008-03-08', 'DOMULUR');
+SELECT * FROM  insure.accident;
+
+SELECT accident_date, location FROM insure.accident;
+
+SELECT driver_id FROM insur.participated WHERE damage_amount >= 25000;
+
+SELECT COUNT(DISTINCT a.driver_id) AS CNT
+FROM insure.participated a, insure.accident b
+WHERE a.report_num = b.report_num
+AND b.accident_date LIKE '%08';
+
+SELECT * FROM insure.car
+ORDER BY year ASC;
+
+SELECT COUNT(p.report_num) AS CNT
+FROM insure.car c, insure.participated p
+WHERE c.reg_num = p.reg_num
+  AND c.model = 'LANCER';
+
+SELECT * FROM insure.participated
+ORDER BY damage_amount DESC;
+
+SELECT a.name
+FROM insure.person a, insure.participated b
+WHERE a.driver_id = b.driver_id
+AND b.damage_amount > (SELECT AVG(damage_amount) FROM insure.participated);
+
+
+SELECT MAX(damage_amount) AS MAX_DAMAGE
+FROM insure.participated;
+
+
+
+SELECT AVG(damage_amount) AS AVG_DAMAGE
+FROM insure.participated;
+
